@@ -1,0 +1,9 @@
+# Local equivalent of deployment.yaml (Deployment "my-app", 1 replica)
+services:
+  my-app:
+    build: .
+    image: my-docker-image:latest
+    container_name: my-app-container
+    ports:
+      - "3000:3000"  # adjust to the port your app listens on
+    restart: unless-stopped
