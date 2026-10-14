@@ -1,5 +1,7 @@
 # Exploring Azure Kubernetes Services
 
+Using the Couresera tutorial: [Deploy containers by using Azure Kubernetes Service](https://www.coursera.org/learn/deploy-containers-with-azure-kubernetes-service/home/welcome)
+
 ## Notes
 
 1. Create managed node resource group
@@ -12,7 +14,7 @@ az aks create \
   --resource-group $RESOURCE_GROUP \
   --name aks-hajar-dev \
   --node-resource-group rg-aks-hajar-nodes \
-  --location malaysiawest \
+  --location $LOCATION \
   --tier free \
   --node-count 1 \
   --node-vm-size Standard_D2s_v3 \
@@ -24,7 +26,7 @@ az aks create \
 
 ```bash
 az aks show \
-  --resource-group rg-cerdas-dev \
+  --resource-group $RESOURCE_GROUP \
   --name aks-hajar-dev \
   --query "{name:name, state:provisioningState, tier:sku.tier, nodeRG:nodeResourceGroup}" \
   -o table
