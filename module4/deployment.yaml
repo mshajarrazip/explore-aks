@@ -1,17 +1,64 @@
+# API group and version that defines the Deployment resource.
+# Deployments live in the "apps" group; "v1" is the stable version.
+# List what your cluster supports with: kubectl api-resources
 apiVersion: apps/v1
+
+# The type of object to create. A Deployment keeps a set of identical
+# pods running and handles rolling updates when the pod template changes.
 kind: Deployment
+
+# Identifies this Deployment object itself (not the pods it creates).
 metadata:
+  # Name used with kubectl, e.g. `kubectl get deployment my-app`.
+  # Must be unique per kind within the namespace.
   name: my-app
+  # No namespace is set, so it goes into the current context's
+  # namespace ("default" unless you changed it).
+
+# The desired state. Kubernetes continuously works to make the cluster
+# match this; you never start pods by hand.
 spec:
+  # How many copies of the pod to keep running. If a pod dies or its
+  # node goes away, a replacement is created to get back to this number.
   replicas: 1
+
+  # How the Deployment finds the pods it owns: any pod whose labels
+  # match these. Must match template.metadata.labels below, and cannot
+  # be changed after the Deployment is created.
   selector:
     matchLabels:
       app: my-app
+
+  # Blueprint for every pod this Deployment creates. Changing anything
+  # in here (e.g. the image) triggers a rolling update: new pods are
+  # started and old ones removed gradually.
   template:
     metadata:
+      # Labels stamped onto each pod. The selector above matches on
+      # these, and so would a Service (`kubectl get pods -l app=my-app`
+      # uses them too). Pod names are generated, e.g. my-app-7d9c...-x2k4p.
       labels:
         app: my-app
+
+    # Pod spec: what actually runs inside each pod.
     spec:
+      # A pod can hold several containers that share network and
+      # storage; this one has just the app.
       containers:
+        # Container name within the pod, shown in `kubectl describe pod`
+        # and used with `kubectl logs <pod> -c my-app-container`.
         - name: my-app-container
-          image: my-docker-image:latest
+
+          # Image the node pulls (via the kubelet and containerd).
+          # The GHCR package is public, so no imagePullSecrets are needed.
+          # With the `:latest` tag Kubernetes defaults imagePullPolicy to
+          # Always, so each new pod pulls the newest pushed image.
+          image: ghcr.io/mshajarrazip/my-docker-image:latest
+
+          # Port the app listens on inside the container (uvicorn, see
+          # Dockerfile). Informational only: it documents the port and
+          # lets Services refer to it by name, but it does not expose or
+          # publish anything. Nothing outside the cluster can reach it
+          # until a Service (or port-forward) is added.
+          ports:
+            - containerPort: 8000

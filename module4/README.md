@@ -2,9 +2,13 @@
 
 Files:
 
-- `Dockerfile`: builds a Node.js app image (expects `package.json` and app source in this folder)
+- `main.py`: FastAPI app with a single `GET /` endpoint
+- `requirements.txt`: Python dependencies
+- `Dockerfile`: builds the FastAPI app image (served by uvicorn on port 8000)
 - `compose.yaml`: runs the image locally, equivalent to `deployment.yaml`
-- `deployment.yaml`: Kubernetes Deployment `my-app` with 1 replica
+- `deployment.yaml`: Kubernetes Deployment `my-app` with 1 replica (commented line by line)
+
+See [docs/manifest-primer.md](../docs/manifest-primer.md) for the basics of Kubernetes config files.
 
 ## Run locally
 
@@ -24,41 +28,33 @@ docker compose down
 
 ## Deploy to AKS
 
-AKS can't pull `my-docker-image:latest` from your local Docker, so the image needs to be pushed to a registry first (e.g. Azure Container Registry).
+AKS can't pull `my-docker-image:latest` from your local Docker, so the image needs to be pushed to a registry first. This uses GitHub Container Registry (`ghcr.io`).
 
-1. Create an ACR and attach it to the cluster
+1. Log in to GitHub with the `gh` CLI, requesting the `write:packages` scope
 
 ```bash
-RESOURCE_GROUP=rg-name
-ACR_NAME=acrhajardev  # must be globally unique, alphanumeric only
-
-az acr create \
-  --resource-group $RESOURCE_GROUP \
-  --name $ACR_NAME \
-  --sku Basic
-
-az aks update \
-  --resource-group $RESOURCE_GROUP \
-  --name aks-hajar-dev \
-  --attach-acr $ACR_NAME
+gh auth login --scopes write:packages
+# or, if you're already logged in:
+# gh auth refresh --scopes write:packages
 ```
 
 1. Build and push the image
 
 ```bash
-az acr login --name $ACR_NAME
+GH_USER=username # must be lowercase in the image name
 
-docker build -t $ACR_NAME.azurecr.io/my-docker-image:latest .
-docker push $ACR_NAME.azurecr.io/my-docker-image:latest
+gh auth token | docker login ghcr.io -u $GH_USER --password-stdin
 
-# or build directly in Azure without local Docker
-# az acr build --registry $ACR_NAME --image my-docker-image:latest .
+# builds and pushes the image named in compose.yaml
+docker compose build --push
 ```
 
-1. Point `deployment.yaml` at the pushed image
+1. Make the package public so AKS can pull it without credentials: on GitHub go to your profile → Packages → `my-docker-image` → Package settings → Change visibility → Public
+
+1. `deployment.yaml` already points at the pushed image
 
 ```yaml
-image: <ACR_NAME>.azurecr.io/my-docker-image:latest
+image: ghcr.io/mshajarrazip/my-docker-image:latest
 ```
 
 1. Apply the deployment
@@ -75,8 +71,8 @@ kubectl logs -l app=my-app
 1. Access the app (no Service is defined yet, so port-forward to test)
 
 ```bash
-kubectl port-forward deployment/my-app 3000:3000
-# then open http://localhost:3000
+kubectl port-forward deployment/my-app 8000:8000
+# then open http://localhost:8000
 ```
 
 1. Clean up
