@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: microservice
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: microdb
+  name: microdb
+  namespace: microservice
+spec:
+  containers:
+  - image: mariadb
+    name: microdb
+    resources: {}
+    env:
+    - name: MARIADB_ROOT_PASSWORD
+      value: password
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
