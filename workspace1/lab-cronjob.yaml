@@ -1,0 +1,34 @@
+# cronjob that sleeps for 30 seconds ( every minute )
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sleeper
+  namespace: default
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      name: sleeper
+    spec:
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - command:
+            - sleep
+            - "30"
+            image: busybox
+            imagePullPolicy: Always
+            name: sleeper
+            resources: {}
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 60
+  schedule: '* * * * *'
+  successfulJobsHistoryLimit: 3
+  suspend: false
