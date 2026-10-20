@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/storage"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: task-pv-claim
+  containers:
+  - image: busybox
+    name: mypod
+    command: ["sleep", "infinity"]
+    volumeMounts:
+      - mountPath: "/data"
+        name: task-pv-storage
+
+# #  steps to complete the lab
+# https://www.coursera.org/learn/pearson-certified-kubernetes-application-developer-ckad-4th-edition-video-mieb1/lecture/BoVTN/lab-setting-up-storage
+# kubectl apply -f lab7.yaml
+
+# # check status
+# watch -n1 kubectl get pods,pvc,pv
+
+# # use kubectl, I copied from module4 instead
+# kubectl cp ../module4/compose.yaml mypod:/data
+
+# #  then I check /storage in minuke
+# minikube ssh
+# ls /storage
+

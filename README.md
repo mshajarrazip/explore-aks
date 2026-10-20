@@ -4,7 +4,7 @@ Previously, I did some tutorials on K8s fundamentals: [Notes here](https://githu
 
 [module4](./module4) contain some hands-on while I followed the Couresera course: [Deploy containers by using Azure Kubernetes Service](https://www.coursera.org/learn/deploy-containers-with-azure-kubernetes-service/home/welcome). I've Completed this course: [ See my certificate ](https://coursera.org/share/07dbfe89159dd36138cf5f815832aea2)
 
-Now, doing Coursera's [Certified Kubernetes Application Developer (CKAD)](https://www.coursera.org/specializations/pearson-certified-kubernetes-application-developer-ckad) course for a bit more mastery and 
+Now, doing Coursera's [Certified Kubernetes Application Developer (CKAD)](https://www.coursera.org/specializations/pearson-certified-kubernetes-application-developer-ckad) course for a bit more mastery.
 
 ## Notes
 
